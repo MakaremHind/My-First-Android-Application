@@ -7,6 +7,7 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
@@ -22,6 +23,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.automacorp.model.RoomDto
 import com.automacorp.service.RoomService
 import com.automacorp.ui.theme.AutomacorpTheme
 
@@ -37,7 +39,7 @@ class RoomActivity : ComponentActivity() {
             AutomacorpTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
                     if (room != null) {
-                        RoomDetail(room.toString(), Modifier.padding(innerPadding))
+                        RoomDetail(room, Modifier.padding(innerPadding))
                     } else {
                         NoRoom(Modifier.padding(innerPadding))
                     }
@@ -61,18 +63,32 @@ fun NoRoom(modifier: Modifier = Modifier) {
 }
 
 @Composable
-fun RoomDetail(name: String, modifier: Modifier = Modifier) {
+fun RoomDetail(roomDto: RoomDto, modifier: Modifier = Modifier) {
+    var room by remember { mutableStateOf(roomDto) }
+
     Column(modifier = modifier.padding(16.dp)) {
-        var nameState by remember { mutableStateOf(name) }
-        Text(
-            text = stringResource(R.string.act_room_name),
-            style = MaterialTheme.typography.labelSmall,
-            modifier = Modifier.padding(bottom = 4.dp)
-        )
+        // Room Name
         OutlinedTextField(
-            nameState,
-            onValueChange = { nameState = it },
-            placeholder = { Text(stringResource(R.string.act_room_name)) },
+            value = room.name,
+            onValueChange = { room = room.copy(name = it) },
+            modifier = Modifier.fillMaxWidth(),
+            placeholder = { Text(stringResource(R.string.act_room_name)) }
+        )
+
+        // Current Temperature
+        Text(
+            text = stringResource(R.string.act_room_current_temperature) + ": " +
+                    (room.currentTemperature?.toString() ?: "N/A"),
+            style = MaterialTheme.typography.bodyMedium,
+            modifier = Modifier.padding(top = 16.dp)
+        )
+
+        // Target Temperature (Placeholder for next step)
+        Text(
+            text = stringResource(R.string.act_room_target_temperature) + ": " +
+                    (room.targetTemperature?.toString() ?: "N/A"),
+            style = MaterialTheme.typography.bodyMedium,
+            modifier = Modifier.padding(top = 16.dp)
         )
     }
 }
@@ -80,7 +96,15 @@ fun RoomDetail(name: String, modifier: Modifier = Modifier) {
 @Preview(showBackground = true)
 @Composable
 fun RoomDetailPreview() {
+    val sampleRoom = RoomDto(
+        id = 1L,
+        name = "Sample Room",
+        currentTemperature = 22.5,
+        targetTemperature = 24.0,
+        windows = emptyList() // Provide an empty list of windows for simplicity
+    )
+
     AutomacorpTheme {
-        RoomDetail("Android")
+        RoomDetail(roomDto = sampleRoom)
     }
 }
