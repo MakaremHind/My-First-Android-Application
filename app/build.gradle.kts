@@ -56,4 +56,7 @@ dependencies {
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
+    implementation("androidx.compose.ui:ui:1.7.5") // Replace with the latest version
+    implementation("androidx.compose.foundation:foundation:1.7.5") // For foundational Compose elements
+
 }
