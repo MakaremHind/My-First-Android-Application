@@ -23,14 +23,18 @@ import androidx.compose.ui.unit.dp
 import com.automacorp.ui.theme.AutomacorpTheme
 
 class RoomActivity : ComponentActivity() {
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        val param = intent.getStringExtra(MainActivity.ROOM_PARAM)
+
         enableEdgeToEdge()
         setContent {
             AutomacorpTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
                     RoomDetail(
-                        name = "Android",
+                        name = param ?: "",
                         modifier = Modifier.padding(innerPadding)
                     )
                 }
@@ -54,7 +58,6 @@ fun RoomDetail(name: String, modifier: Modifier = Modifier) {
             placeholder = { Text(stringResource(R.string.act_room_name)) },
         )
     }
-
 }
 
 @Preview(showBackground = true)

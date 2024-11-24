@@ -1,7 +1,7 @@
 package com.automacorp
 
+import android.content.Intent
 import android.os.Bundle
-import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -19,19 +19,27 @@ import androidx.compose.ui.unit.dp
 import com.automacorp.ui.theme.AutomacorpTheme
 
 class MainActivity : ComponentActivity() {
+
+    companion object {
+        const val ROOM_PARAM = "com.automacorp.room.attribute"
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         // Action to do when the button is clicked
         val onSayHelloButtonClick: (name: String) -> Unit = { name ->
-            Toast.makeText(baseContext, "Hello $name", Toast.LENGTH_LONG).show()
+            val intent = Intent(this, RoomActivity::class.java).apply {
+                putExtra(ROOM_PARAM, name)
+            }
+            startActivity(intent)
         }
 
         setContent {
             AutomacorpTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
                     Greeting(
-                        onClick = onSayHelloButtonClick, // Pass the action to Greeting
+                        onClick = onSayHelloButtonClick,
                         modifier = Modifier.padding(innerPadding)
                     )
                 }
@@ -57,7 +65,7 @@ fun Greeting(
     modifier: Modifier = Modifier,
     onClick: (name: String) -> Unit
 ) {
-    var inputName by remember { mutableStateOf("") } // State to manage text input
+    var inputName by remember { mutableStateOf("") }
 
     Column(
         modifier = modifier
@@ -65,10 +73,8 @@ fun Greeting(
             .padding(horizontal = 16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        // App Logo
         AppLogo()
 
-        // Welcome Text
         Text(
             text = stringResource(R.string.act_main_welcome),
             style = MaterialTheme.typography.headlineMedium,
@@ -78,7 +84,6 @@ fun Greeting(
             textAlign = TextAlign.Center
         )
 
-        // Text Field for Input
         OutlinedTextField(
             value = inputName,
             onValueChange = { inputName = it },
@@ -90,14 +95,13 @@ fun Greeting(
             }
         )
 
-        // Button to Display the Name
         Button(
-            onClick = { onClick(inputName) }, // Pass inputName to the onClick function
+            onClick = { onClick(inputName) },
             modifier = Modifier
                 .padding(8.dp)
                 .align(Alignment.CenterHorizontally)
         ) {
-            Text(text = stringResource(R.string.act_main_open)) // Button text: "Open"
+            Text(text = stringResource(R.string.act_main_open))
         }
     }
 }
