@@ -1,6 +1,5 @@
 package com.automacorp.service
 
-import androidx.core.text.isDigitsOnly
 import com.automacorp.model.RoomDto
 import com.automacorp.model.WindowDto
 import com.automacorp.model.WindowStatus
@@ -16,7 +15,7 @@ object RoomService {
             name = "${WINDOW_KIND.random()} Window $id",
             roomName = roomName,
             roomId = roomId,
-            windowStatus = WindowStatus.values().random()
+            windowStatus = WindowStatus.entries.random() // Use entries instead of values()
         )
     }
 
@@ -50,7 +49,7 @@ object RoomService {
         return ROOMS.find { it.name.equals(name, ignoreCase = true) }
     }
 
-    fun updateRoom(id: Long, room: RoomDto): RoomDto? {
+    fun updateRoom(id: Long, room: RoomDto): RoomDto {
         // Update an existing room with the given values
         val index = ROOMS.indexOfFirst { it.id == id }
         if (index == -1) throw IllegalArgumentException("Room with ID $id not found")
