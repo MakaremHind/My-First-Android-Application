@@ -4,21 +4,18 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
+import androidx.compose.foundation.layout.*
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
-import com.automacorp.ui.theme.AutomacorpTheme
 import androidx.compose.ui.res.painterResource
-import androidx.compose.foundation.layout.paddingFromBaseline
 import androidx.compose.ui.unit.dp
+import com.automacorp.ui.theme.AutomacorpTheme
+import androidx.compose.foundation.Image
+import androidx.compose.ui.Alignment
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -29,6 +26,7 @@ class MainActivity : ComponentActivity() {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
                     Greeting(
                         name = "Android",
+                        onClick = { name -> println("Button clicked with name: $name") },
                         modifier = Modifier.padding(innerPadding)
                     )
                 }
@@ -36,34 +34,53 @@ class MainActivity : ComponentActivity() {
         }
     }
 }
+
 @Composable
 fun AppLogo(modifier: Modifier = Modifier) {
     Image(
-        painter = painterResource(R.drawable.ic_logo), // Use the logo resource
-        contentDescription = stringResource(R.string.app_logo_description), // Accessibility description
+        painter = painterResource(R.drawable.ic_logo),
+        contentDescription = stringResource(R.string.app_logo_description),
         modifier = modifier
-            .paddingFromBaseline(top = 100.dp) // Adjust position
-            .height(80.dp) // Set the height of the logo
+            .padding(top = 32.dp)
+            .height(80.dp)
+            .fillMaxWidth()
     )
 }
 
 @Composable
-fun Image(painter: Any, contentDescription: String, modifier: Any) {
+fun Greeting(
+    modifier: Modifier = Modifier, // Modifier is placed first as per Compose conventions
+    name: String,
+    onClick: (name: String) -> Unit = {}
+) {
+    Column(
+        modifier = modifier
+            .fillMaxSize()
+            .padding(horizontal = 16.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        // Display the App Logo
+        AppLogo()
 
-}
+        // Welcome Text
+        Text(
+            text = stringResource(R.string.act_main_welcome) + "\nHello $name!", // Use the name parameter
+            style = MaterialTheme.typography.headlineMedium,
+            modifier = Modifier
+                .padding(16.dp)
+                .align(Alignment.CenterHorizontally),
+            textAlign = TextAlign.Center
+        )
 
-@Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Column {
-        Text(
-            text = stringResource(R.string.act_main_welcome),
-            modifier = modifier,
-            textAlign = TextAlign.Center // Optional: Center-align the text
-        )
-        Text(
-            text = "Hello $name!", // Optional: Keep or modify this
-            modifier = modifier
-        )
+        // Button to handle the onClick event
+        Button(
+            onClick = { onClick(name) },
+            modifier = Modifier
+                .padding(top = 16.dp)
+                .align(Alignment.CenterHorizontally)
+        ) {
+            Text(text = "Click Me")
+        }
     }
 }
 
@@ -71,6 +88,9 @@ fun Greeting(name: String, modifier: Modifier = Modifier) {
 @Composable
 fun GreetingPreview() {
     AutomacorpTheme {
-        Greeting("Android")
+        Greeting(
+            name = "Android",
+            onClick = { name -> println("Preview clicked with name: $name") }
+        )
     }
 }
