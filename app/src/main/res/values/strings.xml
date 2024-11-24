@@ -4,4 +4,6 @@
     <string name="act_main_welcome">Welcome on automacorp, the app to manage building windows</string>
     <string name="act_main_open">Open</string>
     <string name="act_main_fill_name">Fill a name</string>
+    <string name="title_activity_room">RoomActivity</string>
+    <string name="act_room_name">Room name</string>
 </resources>
