@@ -12,6 +12,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Slider
+import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -83,12 +85,26 @@ fun RoomDetail(roomDto: RoomDto, modifier: Modifier = Modifier) {
             modifier = Modifier.padding(top = 16.dp)
         )
 
-        // Target Temperature (Placeholder for next step)
+        // Target Temperature with Slider
         Text(
-            text = stringResource(R.string.act_room_target_temperature) + ": " +
-                    (room.targetTemperature?.toString() ?: "N/A"),
+            text = stringResource(R.string.act_room_target_temperature),
             style = MaterialTheme.typography.bodyMedium,
             modifier = Modifier.padding(top = 16.dp)
+        )
+        Slider(
+            value = room.targetTemperature?.toFloat() ?: 18.0f,
+            onValueChange = { room = room.copy(targetTemperature = it.toDouble()) },
+            valueRange = 10f..28f,
+            colors = SliderDefaults.colors(
+                thumbColor = MaterialTheme.colorScheme.secondary,
+                activeTrackColor = MaterialTheme.colorScheme.secondary,
+                inactiveTrackColor = MaterialTheme.colorScheme.secondaryContainer
+            )
+        )
+        Text(
+            text = (room.targetTemperature?.let { "%.1f".format(it) } ?: "N/A"),
+            style = MaterialTheme.typography.bodySmall,
+            modifier = Modifier.padding(top = 8.dp)
         )
     }
 }
