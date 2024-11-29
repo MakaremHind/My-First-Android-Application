@@ -37,7 +37,10 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             AutomacorpTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
+                Scaffold(
+                    topBar = { AutomacorpTopAppBar(null) }, // Add the top app bar
+                    modifier = Modifier.fillMaxSize()
+                ) { innerPadding ->
                     Greeting(
                         onClick = onSayHelloButtonClick,
                         modifier = Modifier.padding(innerPadding)

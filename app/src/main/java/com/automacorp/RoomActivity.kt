@@ -15,9 +15,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
 import com.automacorp.service.RoomService
 import com.automacorp.ui.theme.AutomacorpTheme
-import androidx.compose.ui.unit.dp
 
 class RoomActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -44,6 +44,12 @@ class RoomActivity : ComponentActivity() {
         setContent {
             AutomacorpTheme {
                 Scaffold(
+                    topBar = {
+                        AutomacorpTopAppBar(
+                            title = stringResource(R.string.title_activity_room),
+                            returnAction = { finish() } // Navigates back to the previous screen
+                        )
+                    },
                     floatingActionButton = { RoomUpdateButton(onRoomSave) },
                     modifier = Modifier.fillMaxSize()
                 ) { innerPadding ->
