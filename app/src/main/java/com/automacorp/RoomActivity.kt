@@ -40,16 +40,16 @@ class RoomActivity : ComponentActivity() {
             }
         }
 
+        // Define the back navigation action
+        val navigateBack: () -> Unit = {
+            startActivity(Intent(this, MainActivity::class.java))
+        }
+
         // Set the content of the activity
         setContent {
             AutomacorpTheme {
                 Scaffold(
-                    topBar = {
-                        AutomacorpTopAppBar(
-                            title = stringResource(R.string.title_activity_room),
-                            returnAction = { finish() } // Navigates back to the previous screen
-                        )
-                    },
+                    topBar = { AutomacorpTopAppBar("Room", navigateBack) },
                     floatingActionButton = { RoomUpdateButton(onRoomSave) },
                     modifier = Modifier.fillMaxSize()
                 ) { innerPadding ->
