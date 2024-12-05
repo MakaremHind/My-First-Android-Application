@@ -49,7 +49,7 @@ class RoomActivity : ComponentActivity() {
         setContent {
             AutomacorpTheme {
                 Scaffold(
-                    topBar = { AutomacorpTopAppBar("Room", navigateBack) },
+                    topBar = { AutomacorpTopAppBar("Room", navigateBack, this) },
                     floatingActionButton = { RoomUpdateButton(onRoomSave) },
                     modifier = Modifier.fillMaxSize()
                 ) { innerPadding ->

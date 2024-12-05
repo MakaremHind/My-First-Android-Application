@@ -30,6 +30,7 @@ fun AutomacorpTopAppBar(
         // Rooms Action
         IconButton(onClick = {
             context?.let {
+                Toast.makeText(it, "Rooms Icon Clicked", Toast.LENGTH_SHORT).show()
                 val intent = Intent(it, RoomListActivity::class.java)
                 it.startActivity(intent)
             }
@@ -43,11 +44,11 @@ fun AutomacorpTopAppBar(
         // Mail Action
         IconButton(onClick = {
             context?.let {
+                Toast.makeText(it, "Mail Icon Clicked", Toast.LENGTH_SHORT).show()
                 val mailIntent = Intent(Intent.ACTION_SENDTO, Uri.parse("mailto:hind.a.makarem@gmail.com"))
                 if (mailIntent.resolveActivity(it.packageManager) != null) {
                     it.startActivity(mailIntent)
                 } else {
-                    // Optional: Show a toast message if no email client is available
                     Toast.makeText(it, "No email app found", Toast.LENGTH_SHORT).show()
                 }
             }
@@ -61,11 +62,11 @@ fun AutomacorpTopAppBar(
         // GitHub Action
         IconButton(onClick = {
             context?.let {
+                Toast.makeText(it, "GitHub Icon Clicked", Toast.LENGTH_SHORT).show()
                 val githubIntent = Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/MakaremHind"))
                 if (githubIntent.resolveActivity(it.packageManager) != null) {
                     it.startActivity(githubIntent)
                 } else {
-                    // Optional: Show a toast message if no browser is available
                     Toast.makeText(it, "No browser app found", Toast.LENGTH_SHORT).show()
                 }
             }
@@ -100,24 +101,3 @@ fun AutomacorpTopAppBar(
     }
 }
 
-@Preview(showBackground = true)
-@Composable
-fun AutomacorpTopAppBarHomePreview() {
-    AutomacorpTheme {
-        AutomacorpTopAppBar(
-            title = null,
-            navigateBack = {} // No-op for preview
-        )
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun AutomacorpTopAppBarPreview() {
-    AutomacorpTheme {
-        AutomacorpTopAppBar(
-            title = "A Page",
-            navigateBack = {} // No-op for preview
-        )
-    }
-}
