@@ -36,6 +36,11 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity
+            android:name=".RoomDetailActivity"
+            android:exported="true"
+            android:label="@string/title_activity_room_detail"
+            android:theme="@style/Theme.Automacorp" />
     </application>
 
 </manifest>

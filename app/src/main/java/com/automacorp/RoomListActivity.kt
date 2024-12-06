@@ -39,16 +39,16 @@ class RoomListActivity : ComponentActivity() {
                 ) { innerPadding ->
                     RoomListScreen(
                         modifier = Modifier.padding(innerPadding),
-                        onRoomClick = { roomId -> openRoom(roomId) }
+                        onRoomClick = { roomId -> openRoomDetail(roomId) }
                     )
                 }
             }
         }
     }
 
-    // Function to open the RoomActivity
-    private fun openRoom(roomId: Long) {
-        val intent = Intent(this, RoomActivity::class.java).apply {
+    // Function to open the RoomDetailActivity
+    private fun openRoomDetail(roomId: Long) {
+        val intent = Intent(this, RoomDetailActivity::class.java).apply {
             putExtra(MainActivity.ROOM_PARAM, roomId.toString())
         }
         startActivity(intent)
@@ -123,4 +123,3 @@ fun RoomListScreenPreview() {
         )
     }
 }
-
