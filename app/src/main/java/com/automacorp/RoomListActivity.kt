@@ -25,7 +25,7 @@ class RoomListActivity : ComponentActivity() {
                         AutomacorpTopAppBar(
                             title = "Room List",
                             navigateBack = { finish() }, // Close this activity and return to the previous one
-                            context = this
+
                         )
                     },
                     modifier = Modifier.fillMaxSize()
