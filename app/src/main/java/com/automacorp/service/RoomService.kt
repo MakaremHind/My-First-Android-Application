@@ -15,7 +15,7 @@ object RoomService {
             name = "${WINDOW_KIND.random()} Window $id",
             roomName = roomName,
             roomId = roomId,
-            windowStatus = WindowStatus.entries.random() // Use entries instead of values()
+            windowStatus = WindowStatus.entries.random()
         )
     }
 
@@ -35,22 +35,23 @@ object RoomService {
     private val ROOMS = (1..50).map { generateRoom(it.toLong()) }.toMutableList()
 
     fun findAll(): List<RoomDto> {
-        // Return all rooms sorted by name
         return ROOMS.sortedBy { it.name }
     }
 
+    // Add this function to provide access to the ROOMS for testing or previews
+    fun getRoomAt(index: Int): RoomDto? {
+        return ROOMS.getOrNull(index)
+    }
+
     fun findById(id: Long): RoomDto? {
-        // Find a room by ID
         return ROOMS.find { it.id == id }
     }
 
     fun findByName(name: String): RoomDto? {
-        // Find a room by name
         return ROOMS.find { it.name.equals(name, ignoreCase = true) }
     }
 
     fun updateRoom(id: Long, room: RoomDto): RoomDto {
-        // Update an existing room with the given values
         val index = ROOMS.indexOfFirst { it.id == id }
         if (index == -1) throw IllegalArgumentException("Room with ID $id not found")
 
@@ -64,13 +65,10 @@ object RoomService {
     }
 
     fun findByNameOrId(nameOrId: String?): RoomDto? {
-        if (nameOrId != null) {
-            return if (nameOrId.all { it.isDigit() }) { // Kotlin-based check for digits
-                findById(nameOrId.toLong())
-            } else {
-                findByName(nameOrId)
-            }
-        }
-        return null
+        return if (nameOrId != null) {
+            if (nameOrId.all { it.isDigit() }) findById(nameOrId.toLong())
+            else findByName(nameOrId)
+        } else null
     }
 }
+
