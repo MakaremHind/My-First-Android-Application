@@ -107,3 +107,15 @@ fun AutomacorpTopAppBar(
     }
 }
 
+@Preview(showBackground = true)
+@Composable
+fun AutomacorpTopAppBarPreview() {
+    AutomacorpTheme {
+        AutomacorpTopAppBar(
+            title = "Sample Title",
+            navigateBack = { /* No-op for preview */ }
+        )
+    }
+}
+
+

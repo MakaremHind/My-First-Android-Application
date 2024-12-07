@@ -15,7 +15,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.automacorp.model.RoomDto
 import com.automacorp.service.RoomService
 import com.automacorp.ui.theme.AutomacorpTheme
 
@@ -139,3 +141,62 @@ fun NoRoom(modifier: Modifier = Modifier) {
         )
     }
 }
+
+@Preview(showBackground = true, name = "Room Activity Preview with Labels")
+@Composable
+fun RoomActivityPreview() {
+    val mockRoom = RoomDto(
+        id = 1L,
+        name = "Room EF 6.10",
+        currentTemperature = 18.2,
+        targetTemperature = 20.0,
+        windows = emptyList()
+    )
+    // Simulate the view model data in the preview
+    val mockViewModel = RoomViewModel().apply {
+        room = mockRoom
+    }
+
+    AutomacorpTheme {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            // Label for RoomDetailPreview
+            Text(
+                text = "RoomDetailPreview",
+                style = MaterialTheme.typography.titleLarge,
+                modifier = Modifier.padding(bottom = 8.dp)
+            )
+
+            // RoomDetail section
+            Scaffold(
+                floatingActionButton = { RoomUpdateButton(onClick = { /* No-op for preview */ }) },
+                modifier = Modifier.weight(1f)
+            ) {
+                RoomDetail(model = mockViewModel, modifier = Modifier.padding(it))
+            }
+
+            // Label for NoRoomDetailPreview
+            Text(
+                text = "NoRoomDetailPreview",
+                style = MaterialTheme.typography.titleLarge,
+                modifier = Modifier.padding(vertical = 8.dp)
+            )
+
+            // NoRoom section
+            Scaffold(
+               modifier = Modifier.weight(1f)
+            ) {
+                NoRoom(modifier = Modifier.padding(it))
+            }
+        }
+    }
+}
+
+
+
+
+
