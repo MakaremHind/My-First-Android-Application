@@ -2,50 +2,57 @@ package com.automacorp
 
 import android.content.Intent
 import android.os.Bundle
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.automacorp.model.RoomDto
-import com.automacorp.service.RoomService
+import com.automacorp.service.ApiServices
 import com.automacorp.ui.theme.AutomacorpTheme
-import com.automacorp.ui.theme.PurpleGrey80
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
 
 class RoomListActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContent {
-            AutomacorpTheme {
-                Scaffold(
-                    topBar = {
-                        AutomacorpTopAppBar(
-                            title = "Room List",
-                            navigateBack = { navigateToMainActivity() } // Navigate back to MainActivity
-                        )
-                    },
-                    modifier = Modifier.fillMaxSize()
-                ) { innerPadding ->
-                    RoomListScreen(
-                        modifier = Modifier.padding(innerPadding),
-                        onRoomClick = { roomId -> openRoomDetail(roomId) }
-                    )
+
+        // Navigation functions
+        val navigateBack: () -> Unit = { navigateToMainActivity() }
+        val openRoom: (id: Long) -> Unit = { roomId -> openRoomDetail(roomId) }
+
+        // Fetch rooms from the API
+        ApiServices.roomsApiService.findAll().enqueue(object : Callback<List<RoomDto>> {
+            override fun onResponse(call: Call<List<RoomDto>>, response: Response<List<RoomDto>>) {
+                val rooms = response.body() ?: emptyList()
+                // Display the RoomList composable with the fetched rooms
+                setContent {
+                    RoomList(rooms = rooms, navigateBack = navigateBack, openRoom = openRoom)
                 }
             }
-        }
+
+            override fun onFailure(call: Call<List<RoomDto>>, t: Throwable) {
+                // Handle failure case
+                setContent {
+                    RoomList(rooms = emptyList(), navigateBack = navigateBack, openRoom = openRoom)
+                }
+                t.printStackTrace() // Log the error
+                Toast.makeText(this@RoomListActivity, "Error loading rooms: ${t.message}", Toast.LENGTH_LONG).show()
+            }
+        })
     }
-    // Function to open MainActivity
+
     private fun navigateToMainActivity() {
         val intent = Intent(this, MainActivity::class.java)
         intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK
@@ -53,7 +60,6 @@ class RoomListActivity : ComponentActivity() {
         finish()
     }
 
-    // Function to open the RoomDetailActivity
     private fun openRoomDetail(roomId: Long) {
         val intent = Intent(this, RoomDetailActivity::class.java).apply {
             putExtra(MainActivity.ROOM_PARAM, roomId.toString())
@@ -63,70 +69,68 @@ class RoomListActivity : ComponentActivity() {
 }
 
 @Composable
-fun RoomListScreen(modifier: Modifier = Modifier, onRoomClick: (Long) -> Unit) {
-    // Fetch the list of rooms from RoomService
-    val rooms = remember { RoomService.findAll() }
-
-    // Display the list using LazyColumn
-    LazyColumn(
-        contentPadding = PaddingValues(4.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp),
-        modifier = modifier
-            .fillMaxSize()
-            .padding(8.dp)
-    ) {
-        items(rooms, key = { it.id }) { room ->
-            RoomItem(
-                room = room,
-                modifier = Modifier.fillMaxWidth(),
-                onClick = { onRoomClick(room.id) } // Pass room ID to the click handler
-            )
+fun RoomList(
+    rooms: List<RoomDto>,
+    navigateBack: () -> Unit,
+    openRoom: (id: Long) -> Unit
+) {
+    AutomacorpTheme {
+        Scaffold(
+            topBar = { AutomacorpTopAppBar("Rooms", navigateBack) }
+        ) { innerPadding ->
+            if (rooms.isEmpty()) {
+                Text(
+                    text = "No room found",
+                    modifier = Modifier.padding(innerPadding),
+                    style = MaterialTheme.typography.bodyLarge
+                )
+            } else {
+                LazyColumn(
+                    contentPadding = PaddingValues(4.dp),
+                    verticalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(8.dp),
+                    modifier = Modifier.padding(innerPadding)
+                ) {
+                    items(rooms, key = { it.id }) { room ->
+                        RoomItem(
+                            room = room,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable { openRoom(room.id) },
+                            onClick = { openRoom(room.id) }
+                        )
+                    }
+                }
+            }
         }
     }
 }
 
 @Composable
 fun RoomItem(room: RoomDto, modifier: Modifier = Modifier, onClick: () -> Unit) {
-    Card(
-        colors = CardDefaults.cardColors(containerColor = Color.Transparent),
-        border = BorderStroke(1.dp, PurpleGrey80),
+    androidx.compose.material3.Card(
         modifier = modifier.clickable { onClick() }
     ) {
-        Row(
+        androidx.compose.foundation.layout.Row(
             modifier = Modifier
                 .padding(20.dp)
-                .fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically,
+                .fillMaxWidth()
         ) {
-            Column(
+            androidx.compose.foundation.layout.Column(
                 modifier = Modifier.weight(1f)
             ) {
                 Text(
                     text = room.name,
-                    style = MaterialTheme.typography.bodyLarge,
-                    fontWeight = FontWeight.Bold
+                    style = androidx.compose.material3.MaterialTheme.typography.bodyLarge
                 )
                 Text(
-                    text = "Target temperature: ${room.targetTemperature?.toString() ?: "?"}°",
-                    style = MaterialTheme.typography.bodySmall
+                    text = "Target temperature: ${room.targetTemperature ?: "?"}°",
+                    style = androidx.compose.material3.MaterialTheme.typography.bodySmall
                 )
             }
             Text(
-                text = "${room.currentTemperature?.toString() ?: "?"}°",
-                style = MaterialTheme.typography.headlineLarge,
-                textAlign = TextAlign.Right,
-                modifier = Modifier.align(Alignment.CenterVertically)
+                text = "${room.currentTemperature ?: "?"}°",
+                style = androidx.compose.material3.MaterialTheme.typography.headlineMedium
             )
         }
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun RoomListScreenPreview() {
-    AutomacorpTheme {
-        RoomListScreen(
-            onRoomClick = { /* No-op for preview */ } // Provide a default value
-        )
     }
 }
