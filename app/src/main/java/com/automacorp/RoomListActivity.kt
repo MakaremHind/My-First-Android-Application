@@ -23,6 +23,11 @@ import com.automacorp.ui.theme.AutomacorpTheme
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
+import androidx.activity.compose.setContent
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class RoomListActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -32,25 +37,27 @@ class RoomListActivity : ComponentActivity() {
         val navigateBack: () -> Unit = { navigateToMainActivity() }
         val openRoom: (id: Long) -> Unit = { roomId -> openRoomDetail(roomId) }
 
-        // Fetch rooms from the API
-        ApiServices.roomsApiService.findAll().enqueue(object : Callback<List<RoomDto>> {
-            override fun onResponse(call: Call<List<RoomDto>>, response: Response<List<RoomDto>>) {
-                val rooms = response.body() ?: emptyList()
-                // Display the RoomList composable with the fetched rooms
-                setContent {
-                    RoomList(rooms = rooms, navigateBack = navigateBack, openRoom = openRoom)
+        // Fetch rooms using lifecycleScope and Coroutine
+        lifecycleScope.launch(context = Dispatchers.IO) { // (1)
+            runCatching { ApiServices.roomsApiService.findAll().execute() }
+                .onSuccess { response ->
+                    val rooms = response.body() ?: emptyList()
+                    withContext(context = Dispatchers.Main) { // (2)
+                        setContent {
+                            RoomList(rooms = rooms, navigateBack = navigateBack, openRoom = openRoom)
+                        }
+                    }
                 }
-            }
-
-            override fun onFailure(call: Call<List<RoomDto>>, t: Throwable) {
-                // Handle failure case
-                setContent {
-                    RoomList(rooms = emptyList(), navigateBack = navigateBack, openRoom = openRoom)
+                .onFailure { error ->
+                    withContext(context = Dispatchers.Main) { // (2)
+                        setContent {
+                            RoomList(rooms = emptyList(), navigateBack = navigateBack, openRoom = openRoom)
+                        }
+                        error.printStackTrace() // Log the error
+                        Toast.makeText(this@RoomListActivity, "Error loading rooms: ${error.message}", Toast.LENGTH_LONG).show()
+                    }
                 }
-                t.printStackTrace() // Log the error
-                Toast.makeText(this@RoomListActivity, "Error loading rooms: ${t.message}", Toast.LENGTH_LONG).show()
-            }
-        })
+        }
     }
 
     private fun navigateToMainActivity() {
@@ -67,6 +74,7 @@ class RoomListActivity : ComponentActivity() {
         startActivity(intent)
     }
 }
+
 
 @Composable
 fun RoomList(
