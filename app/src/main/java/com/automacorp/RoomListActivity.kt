@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.viewModels
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -15,49 +16,38 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import com.automacorp.model.RoomDto
-import com.automacorp.service.ApiServices
 import com.automacorp.ui.theme.AutomacorpTheme
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
-import androidx.activity.compose.setContent
-import androidx.lifecycle.lifecycleScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 
 class RoomListActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        val viewModel: RoomViewModel by viewModels() // Attach ViewModel to the Activity
+
         // Navigation functions
         val navigateBack: () -> Unit = { navigateToMainActivity() }
         val openRoom: (id: Long) -> Unit = { roomId -> openRoomDetail(roomId) }
 
-        // Fetch rooms using lifecycleScope and Coroutine
-        lifecycleScope.launch(context = Dispatchers.IO) { // (1)
-            runCatching { ApiServices.roomsApiService.findAll().execute() }
-                .onSuccess { response ->
-                    val rooms = response.body() ?: emptyList()
-                    withContext(context = Dispatchers.Main) { // (2)
-                        setContent {
-                            RoomList(rooms = rooms, navigateBack = navigateBack, openRoom = openRoom)
-                        }
-                    }
-                }
-                .onFailure { error ->
-                    withContext(context = Dispatchers.Main) { // (2)
-                        setContent {
-                            RoomList(rooms = emptyList(), navigateBack = navigateBack, openRoom = openRoom)
-                        }
-                        error.printStackTrace() // Log the error
-                        Toast.makeText(this@RoomListActivity, "Error loading rooms: ${error.message}", Toast.LENGTH_LONG).show()
-                    }
-                }
+        setContent {
+            val roomsState by viewModel.roomsState.collectAsState() // Observe roomsState
+            val context = LocalContext.current
+
+            if (roomsState.error != null) { // Error Handling
+                RoomList(emptyList(), navigateBack, openRoom)
+                Toast.makeText(context, "Error loading rooms: ${roomsState.error}", Toast.LENGTH_LONG).show()
+            } else {
+                RoomList(roomsState.rooms, navigateBack, openRoom) // Display Room List
+            }
         }
+
+        // Trigger API call in ViewModel
+        viewModel.findAll()
     }
 
     private fun navigateToMainActivity() {
@@ -74,7 +64,6 @@ class RoomListActivity : ComponentActivity() {
         startActivity(intent)
     }
 }
-
 
 @Composable
 fun RoomList(
