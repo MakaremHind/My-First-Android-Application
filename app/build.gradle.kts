@@ -37,6 +37,7 @@ android {
     buildFeatures {
         compose = true
     }
+
 }
 
 dependencies {
@@ -59,5 +60,7 @@ dependencies {
     debugImplementation(libs.androidx.ui.test.manifest)
     implementation("androidx.compose.ui:ui:1.7.5") // Replace with the latest version
     implementation("androidx.compose.foundation:foundation:1.7.5") // For foundational Compose elements
+    implementation (libs.retrofit)
+    implementation(libs.retrofit.moshi) // Moshi converter for Retrofit
 
 }
