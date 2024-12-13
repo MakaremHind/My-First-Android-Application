@@ -1,4 +1,5 @@
 package com.automacorp
+
 import android.content.Intent
 import android.os.Bundle
 import android.widget.Toast
@@ -17,7 +18,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.automacorp.model.RoomDto
-import com.automacorp.service.RoomService
 import com.automacorp.ui.theme.AutomacorpTheme
 
 class RoomActivity : ComponentActivity() {
@@ -25,17 +25,19 @@ class RoomActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
 
-        // Retrieve the room parameter from the Intent
-        val param = intent.getStringExtra(MainActivity.ROOM_PARAM)
+        // Retrieve the room ID from the Intent
+        val roomId = intent.getStringExtra(MainActivity.ROOM_PARAM)?.toLongOrNull()
 
-        // Use a ViewModel to store the room state
+        // Use ViewModel to manage room details
         val viewModel: RoomViewModel by viewModels()
-        viewModel.room = RoomService.findByNameOrId(param)
 
-        // Define the save action for the Floating Action Button
+        // Load room from the remote API
+        roomId?.let { viewModel.findRoom(it) }
+
+        // Save updated room to the remote API
         val onRoomSave: () -> Unit = {
             viewModel.room?.let { room ->
-                RoomService.updateRoom(room.id, room)
+                viewModel.updateRoom(room.id, room)
                 Toast.makeText(this, "Room ${room.name} was updated", Toast.LENGTH_LONG).show()
                 startActivity(Intent(this, MainActivity::class.java))
             }
@@ -46,7 +48,6 @@ class RoomActivity : ComponentActivity() {
             startActivity(Intent(this, MainActivity::class.java))
         }
 
-        // Set the content of the activity
         setContent {
             AutomacorpTheme {
                 Scaffold(
@@ -65,7 +66,6 @@ class RoomActivity : ComponentActivity() {
     }
 }
 
-// Composable for the Floating Action Button
 @Composable
 fun RoomUpdateButton(onClick: () -> Unit) {
     ExtendedFloatingActionButton(
@@ -80,7 +80,6 @@ fun RoomUpdateButton(onClick: () -> Unit) {
     )
 }
 
-// Composable for Room Detail
 @Composable
 fun RoomDetail(model: RoomViewModel, modifier: Modifier = Modifier) {
     val room = model.room
@@ -127,7 +126,6 @@ fun RoomDetail(model: RoomViewModel, modifier: Modifier = Modifier) {
     }
 }
 
-// Composable for No Room Found
 @Composable
 fun NoRoom(modifier: Modifier = Modifier) {
     Box(
@@ -187,15 +185,10 @@ fun RoomActivityPreview() {
 
             // NoRoom section
             Scaffold(
-               modifier = Modifier.weight(1f)
+                modifier = Modifier.weight(1f)
             ) {
                 NoRoom(modifier = Modifier.padding(it))
             }
         }
     }
 }
-
-
-
-
-

@@ -1,5 +1,6 @@
 package com.automacorp
 
+import RoomCommandDto
 import android.content.Intent
 import android.os.Bundle
 import android.widget.Toast
@@ -12,9 +13,9 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -28,25 +29,34 @@ class RoomListActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        val viewModel: RoomViewModel by viewModels() // Attach ViewModel to the Activity
+        val viewModel: RoomViewModel by viewModels()
 
-        // Navigation functions
         val navigateBack: () -> Unit = { navigateToMainActivity() }
         val openRoom: (id: Long) -> Unit = { roomId -> openRoomDetail(roomId) }
 
         setContent {
-            val roomsState by viewModel.roomsState.collectAsState() // Observe roomsState
+            val roomsState by viewModel.roomsState.collectAsState()
             val context = LocalContext.current
 
-            if (roomsState.error != null) { // Error Handling
-                RoomList(emptyList(), navigateBack, openRoom)
-                Toast.makeText(context, "Error loading rooms: ${roomsState.error}", Toast.LENGTH_LONG).show()
-            } else {
-                RoomList(roomsState.rooms, navigateBack, openRoom) // Display Room List
+            Scaffold(
+                topBar = {
+                    AutomacorpTopAppBar("Rooms", navigateBack) {
+                        // Add "Create Room" button in the App Bar
+                        IconButton(onClick = { showCreateRoomDialog(viewModel, context) }) {
+                            Icon(Icons.Filled.Add, contentDescription = "Create Room")
+                        }
+                    }
+                }
+            ) { innerPadding -> // Use innerPadding here
+                if (roomsState.error != null) {
+                    Toast.makeText(context, "Error loading rooms: ${roomsState.error}", Toast.LENGTH_LONG).show()
+                    RoomList(emptyList(), navigateBack, openRoom, Modifier.padding(innerPadding)) // Pass innerPadding
+                } else {
+                    RoomList(roomsState.rooms, navigateBack, openRoom, Modifier.padding(innerPadding)) // Pass innerPadding
+                }
             }
         }
 
-        // Trigger API call in ViewModel
         viewModel.findAll()
     }
 
@@ -63,13 +73,22 @@ class RoomListActivity : ComponentActivity() {
         }
         startActivity(intent)
     }
+
+    private fun showCreateRoomDialog(viewModel: RoomViewModel, context: android.content.Context) {
+        val newRoom = RoomCommandDto(name = "New Room", targetTemperature = 22.0, currentTemperature = 20.0)
+        viewModel.createRoom(newRoom)
+        Toast.makeText(context, "Room created successfully!", Toast.LENGTH_SHORT).show()
+        viewModel.findAll() // Refresh room list
+    }
 }
+
 
 @Composable
 fun RoomList(
     rooms: List<RoomDto>,
     navigateBack: () -> Unit,
-    openRoom: (id: Long) -> Unit
+    openRoom: (id: Long) -> Unit,
+    modifier: Modifier = Modifier // Add modifier parameter with a default value
 ) {
     AutomacorpTheme {
         Scaffold(
@@ -78,14 +97,14 @@ fun RoomList(
             if (rooms.isEmpty()) {
                 Text(
                     text = "No room found",
-                    modifier = Modifier.padding(innerPadding),
+                    modifier = modifier.padding(innerPadding), // Use modifier with innerPadding
                     style = MaterialTheme.typography.bodyLarge
                 )
             } else {
                 LazyColumn(
                     contentPadding = PaddingValues(4.dp),
                     verticalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(8.dp),
-                    modifier = Modifier.padding(innerPadding)
+                    modifier = modifier.padding(innerPadding) // Use modifier with innerPadding
                 ) {
                     items(rooms, key = { it.id }) { room ->
                         RoomItem(
@@ -101,6 +120,8 @@ fun RoomList(
         }
     }
 }
+
+
 
 @Composable
 fun RoomItem(room: RoomDto, modifier: Modifier = Modifier, onClick: () -> Unit) {
